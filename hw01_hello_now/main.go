@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	extime, err := ntp.Time("www.ntp5.stratum2.ru")
+	extime, err := ntp.Time("ntp2.stratum2.ru")
 	if err != nil {
 		log.Fatal("error while connect to ntp server:", err)
 	}
