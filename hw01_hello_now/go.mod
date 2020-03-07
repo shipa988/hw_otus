@@ -1,4 +1,4 @@
-module github.com/shipa988/hw_otus/tree/master/hw01_hello_now
+module github.com/shipa988/hw_otus/hw01_hello_now
 
 go 1.13
 
