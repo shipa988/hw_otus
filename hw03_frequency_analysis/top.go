@@ -1,6 +1,5 @@
 package hw03_frequency_analysis //nolint:golint,stylecheck
 import (
-	"sort"
 	"strings"
 )
 
@@ -20,7 +19,7 @@ func Top10(in string) []string {
 		asteriskstr := strings.ReplaceAll(in, " - ", "")
 		asteriskstr = strings.ToLower(asteriskstr)
 		strspl = strings.FieldsFunc(asteriskstr, func(r rune) bool {
-			return strings.ContainsRune(" ;,.!&\"\t\r\n", r)
+			return strings.ContainsRune(" 0123456789;,.!&\"\t\r\n", r)
 		})
 	} else {
 		strspl = strings.FieldsFunc(in, func(r rune) bool {
@@ -31,17 +30,17 @@ func Top10(in string) []string {
 	for _, word := range strspl {
 		dict[word]++
 	}*/
-	sort.Slice(strspl, func(i, j int) bool { //сортируем исходный текст по алфавиту для упаковки в слайс (с мапой без сортировки)
-		return strspl[i] < strspl[j]
-	})
 	err := list.AddRange(strspl)
 	if err != nil {
 		panic(err)
 	}
 	list.Sort()
-	var top10 = make([]string, 0, top)
-	for _, word := range list[0:top] {
-		top10 = append(top10, word.key)
+	if list.Len() >= top {
+		var top10 = make([]string, 0, top)
+		for _, word := range list[0:top] {
+			top10 = append(top10, word.key)
+		}
+		return top10
 	}
-	return top10
+	return []string{}
 }
