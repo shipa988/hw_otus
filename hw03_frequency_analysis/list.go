@@ -1,0 +1,43 @@
+package hw03_frequency_analysis //nolint:golint,stylecheck
+
+import "sort"
+
+const initializeValue = 1
+
+type keyValuePair struct {
+	key   string
+	value int
+}
+type List []keyValuePair
+
+func (l *List) Sort() {
+	sort.Sort(l)
+}
+func (l *List) AddRange(array []string) error {
+	var lword string
+	for _, word := range array {
+		if word != lword {
+			*l = append(*l, keyValuePair{
+				key:   word,
+				value: initializeValue,
+			})
+			lword = word
+		} else {
+			(*l)[l.Len()-1].key = word
+			(*l)[l.Len()-1].value++
+		}
+	}
+	return nil
+}
+
+func (l List) Len() int {
+	return len(l)
+}
+
+func (l List) Less(i, j int) bool {
+	return l[i].value > l[j].value
+}
+
+func (l List) Swap(i, j int) {
+	l[i], l[j] = l[j], l[i]
+}
