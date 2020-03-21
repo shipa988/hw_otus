@@ -7,7 +7,7 @@ import (
 )
 
 // Change to true if needed
-var taskWithAsteriskIsCompleted = false
+//var taskWithAsteriskIsCompleted = true
 
 var text = `Как видите, он  спускается  по  лестнице  вслед  за  своим
 	другом   Кристофером   Робином,   головой   вниз,  пересчитывая
@@ -43,11 +43,17 @@ var text = `Как видите, он  спускается  по  лестни�
 	посидеть у огня и послушать какую-нибудь интересную сказку.
 		В этот вечер...`
 
+func TestList(t *testing.T) {
+	list := List{keyValuePair{key: "test", value: 1}}
+	assert.Errorf(t, list.AddRange([]string{"1", "2"}), "List must be empty before adding range, but it has len:"+string(list.Len()))
+}
 func TestTop10(t *testing.T) {
 	t.Run("no words in empty string", func(t *testing.T) {
 		assert.Len(t, Top10(""), 0)
 	})
-
+	t.Run("no words only digits", func(t *testing.T) {
+		assert.Len(t, Top10("1 2 3 4 5 6 7 7 6 5 4 8 96 66 3 333 24 6 7 3232 	 4 5 7"), 0)
+	})
 	t.Run("positive test", func(t *testing.T) {
 		if taskWithAsteriskIsCompleted {
 			expected := []string{"он", "а", "и", "что", "ты", "не", "если", "то", "его", "кристофер", "робин", "в"}
