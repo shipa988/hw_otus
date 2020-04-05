@@ -19,8 +19,16 @@ func TestCache(t *testing.T) {
 		_, ok = c.Get("bbb")
 		require.False(t, ok)
 	})
-
+	t.Run("empty cashe#2", func(t *testing.T) {
+		c := NewCache(0)
+		wasInCache := c.Set("first", 0)
+		require.False(t, wasInCache)
+		c2 := NewCache(-1)
+		wasInCache = c2.Set("first", -1)
+		require.False(t, wasInCache)
+	})
 	t.Run("simple", func(t *testing.T) {
+
 		c := NewCache(5)
 
 		wasInCache := c.Set("aaa", 100)
@@ -48,15 +56,54 @@ func TestCache(t *testing.T) {
 		require.False(t, ok)
 		require.Nil(t, val)
 	})
-
+	t.Run("clear cache", func(t *testing.T) {
+		c := NewCache(5)
+		require.Error(t, c.Clear())
+		c.Set("first", 1)
+		require.NoError(t, c.Clear())
+	})
 	t.Run("purge logic", func(t *testing.T) {
-		// Write me
+		c := NewCache(5) //емкость 5 для 10 элементов
+		//set
+		c.Set("Albania", ".al")
+		c.Set("Australia", ".com.au")
+		c.Set("Austria", ".at")
+		c.Set("Belgium", ".be")
+		c.Set("Italy", ".it")
+		c.Get("Italy")
+		c.Set("Japan", ".jp")
+		c.Set("Russian Federation", ".ru")
+		c.Set("Singapore", ".sg")
+		c.Set("Taiwan", ".tw")
+		c.Set("USA", ".us")
+		//get/set
+		c.Get("Russian Federation")
+		c.Get("Japan")
+		c.Get("Italy")
+		c.Get("USA")
+		c.Get("USA")
+		c.Get("USA")
+		c.Get("Japan")
+		c.Get("Russian Federation")
+		c.Get("Russian Federation")
+		c.Set("South Korea", ".kr")
+		c.Set("Romania", ".ro")
+		c.Get("USA")
+		require.Equal(t, []Key{"Japan", "Russian Federation", "South Korea", "Romania", "USA"}, printCash(c))
 	})
 }
-
+func printCash(l Cache) []Key {
+	sl := []Key{}
+	elem := l.(*lruCache).queue.Back()
+	for i := 0; i < l.(*lruCache).queue.Len(); i++ {
+		if item, ok := elem.Value.(*cacheItem); ok {
+			sl = append(sl, item.key)
+		}
+		elem = elem.Next
+	}
+	return sl
+}
 func TestCacheMultithreading(t *testing.T) {
-	t.Skip() // Remove if task with asterisk completed
-
 	c := NewCache(10)
 	wg := &sync.WaitGroup{}
 	wg.Add(2)

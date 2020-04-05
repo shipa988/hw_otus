@@ -1,15 +1,139 @@
 package hw04_lru_cache //nolint:golint,stylecheck
+import (
+	"fmt"
+
+	"github.com/pkg/errors"
+)
+
+var _ List = (*list)(nil)
 
 type List interface {
-	// Place your code here
+	Len() int                          // длина списка
+	Front() *listItem                  // первый Item
+	Back() *listItem                   // последний Item
+	PushFront(v interface{}) *listItem // добавить значение в начало
+	PushBack(v interface{}) *listItem  // добавить значение в конец
+	Remove(i *listItem) error          // удалить элемент
+	MoveToFront(i *listItem) error     // переместить элемент в начало
 }
 
 type listItem struct {
-	// Place your code here
+	Value interface{} // значение
+	Prev  *listItem   // следующий элемент
+	Next  *listItem   // предыдущий элемент
+
 }
 
 type list struct {
-	// Place your code here
+	len   int
+	back  *listItem
+	front *listItem
+}
+
+func isNilList(l *list) (*list, error) {
+	if l == nil {
+		l = NewList().(*list)
+		return l, errors.New("list is nil, return new list")
+	}
+	return l, nil
+}
+func isNilItem(i *listItem) error {
+	if i == nil {
+		return errors.New("item is nil")
+	}
+	return nil
+}
+
+func (l *list) Len() int {
+	l, err := isNilList(l)
+	if err != nil {
+		fmt.Printf("%v\r\n", errors.Wrap(err, "can't get len"))
+	}
+	return l.len
+}
+
+func (l *list) Front() *listItem {
+	l, err := isNilList(l)
+	if err != nil {
+		fmt.Printf("%v\r\n", errors.Wrap(err, "can't get front"))
+	}
+	return l.front
+}
+
+func (l *list) Back() *listItem {
+	l, err := isNilList(l)
+	if err != nil {
+		fmt.Printf("%v\r\n", errors.Wrap(err, "can't get back"))
+	}
+	return l.back
+}
+
+func (l *list) PushFront(v interface{}) *listItem {
+	l, err := isNilList(l)
+	if err != nil {
+		fmt.Printf("%v\r\n", errors.Wrap(err, "can't PushFront "))
+	}
+	item := new(listItem)
+	item.Value = v
+	item.Next = nil
+	if l.front == nil { //пустой список
+		item.Prev = nil
+		l.back = item
+	} else {
+		item.Prev = l.front
+		l.front.Next = item
+	}
+	l.front = item
+	l.len++
+	return item
+}
+
+func (l *list) PushBack(v interface{}) *listItem {
+	l, err := isNilList(l)
+	if err != nil {
+		fmt.Printf("%v\r\n", errors.Wrap(err, "can't PushBack "))
+	}
+	item := new(listItem)
+	item.Value = v
+	item.Prev = nil
+	if l.back == nil { //пустой список
+		item.Next = nil
+		l.front = item
+	} else {
+		item.Next = l.back
+		l.back.Prev = item
+	}
+	l.back = item
+	l.len++
+	return item
+}
+
+func (l *list) Remove(i *listItem) error {
+	if innerError := isNilItem(i); innerError != nil {
+		return errors.Wrap(innerError, "can't remove item")
+	}
+	prev := i.Prev
+	next := i.Next
+	if prev != nil {
+		prev.Next = next
+	} else { //удаляем back элемент
+		l.back = i.Next
+	}
+	if next != nil {
+		next.Prev = prev
+	} else { //удаляем front элемент
+		l.front = i.Prev
+	}
+	l.len--
+	return nil
+}
+
+func (l *list) MoveToFront(i *listItem) error {
+	if err := l.Remove(i); err != nil {
+		return errors.Wrap(err, "can't move to front item")
+	}
+	l.PushFront(i.Value)
+	return nil
 }
 
 func NewList() List {
