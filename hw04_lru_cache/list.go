@@ -1,7 +1,5 @@
 package hw04_lru_cache //nolint:golint,stylecheck
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 )
 
@@ -30,13 +28,6 @@ type list struct {
 	front *listItem
 }
 
-func isNilList(l *list) (*list, error) {
-	if l == nil {
-		l = NewList().(*list)
-		return l, errors.New("list is nil, return new list")
-	}
-	return l, nil
-}
 func isNilItem(i *listItem) error {
 	if i == nil {
 		return errors.New("item is nil")
@@ -45,34 +36,18 @@ func isNilItem(i *listItem) error {
 }
 
 func (l *list) Len() int {
-	l, err := isNilList(l)
-	if err != nil {
-		fmt.Printf("%v\r\n", errors.Wrap(err, "can't get len"))
-	}
 	return l.len
 }
 
 func (l *list) Front() *listItem {
-	l, err := isNilList(l)
-	if err != nil {
-		fmt.Printf("%v\r\n", errors.Wrap(err, "can't get front"))
-	}
 	return l.front
 }
 
 func (l *list) Back() *listItem {
-	l, err := isNilList(l)
-	if err != nil {
-		fmt.Printf("%v\r\n", errors.Wrap(err, "can't get back"))
-	}
 	return l.back
 }
 
 func (l *list) PushFront(v interface{}) *listItem {
-	l, err := isNilList(l)
-	if err != nil {
-		fmt.Printf("%v\r\n", errors.Wrap(err, "can't PushFront "))
-	}
 	item := new(listItem)
 	item.Value = v
 	item.Next = nil
@@ -89,10 +64,6 @@ func (l *list) PushFront(v interface{}) *listItem {
 }
 
 func (l *list) PushBack(v interface{}) *listItem {
-	l, err := isNilList(l)
-	if err != nil {
-		fmt.Printf("%v\r\n", errors.Wrap(err, "can't PushBack "))
-	}
 	item := new(listItem)
 	item.Value = v
 	item.Prev = nil
