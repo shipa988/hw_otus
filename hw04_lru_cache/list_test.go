@@ -9,15 +9,26 @@ import (
 func TestList(t *testing.T) {
 	t.Run("empty list", func(t *testing.T) {
 		l := NewList()
-
 		require.Equal(t, l.Len(), 0)
 		require.Nil(t, l.Front())
 		require.Nil(t, l.Back())
 	})
-
+	t.Run("Negative test: Operations with empty item", func(t *testing.T) {
+		l := NewList()
+		require.EqualError(t, l.Remove(nil), "can't remove item: item is nil")
+		require.EqualError(t, l.MoveToFront(nil), "can't move to front item: can't remove item: item is nil")
+	})
+	t.Run("Negative test: Operations with empty list", func(t *testing.T) {
+		l := &list{}
+		l = nil
+		require.Panics(t, func() { l.Len() })
+		require.Panics(t, func() { l.Front() })
+		require.Panics(t, func() { l.Back() })
+		require.Panics(t, func() { l.PushFront(10) })
+		require.Panics(t, func() { l.PushBack(10) })
+	})
 	t.Run("complex", func(t *testing.T) {
 		l := NewList()
-
 		l.PushFront(10) // [10]
 		l.PushBack(20)  // [10, 20]
 		l.PushBack(30)  // [10, 20, 30]
