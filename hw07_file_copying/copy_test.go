@@ -23,7 +23,7 @@ type testcase struct {
 var testcases []testcase
 
 func TestCopy(t *testing.T) {
-	tmpdir := "tmp"
+	tmpdir := path.Join(os.TempDir(),"testcopytmp")
 	defer os.RemoveAll(tmpdir)
 	from = path.Join("testdata", "input.txt")
 	frominfo, err := os.Lstat(from)
