@@ -99,7 +99,7 @@ func TestCopy(t *testing.T) {
 
 }
 func newTempFile(dir, templ string) string {
-	err := os.MkdirAll(dir, os.ModeDir)
+	err := os.MkdirAll(dir, os.ModePerm)
 	if err != nil {
 		log.Fatalf("unable to create temp dir fo test. Error: %v", err)
 	}
