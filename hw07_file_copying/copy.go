@@ -2,6 +2,17 @@ package main
 
 import (
 	"errors"
+	"fmt"
+	"io"
+	"math"
+	"os"
+	"time"
+
+	"github.com/cheggaaa/pb/v3"
+)
+
+const (
+	bufsize = 1 << 10
 )
 
 var (
@@ -10,6 +21,43 @@ var (
 )
 
 func Copy(fromPath string, toPath string, offset, limit int64) error {
-	// Place your code here
+	f, err := os.Open(fromPath)
+	if err != nil {
+		return ErrUnsupportedFile
+	}
+	defer f.Close()
+	t, err := os.Create(toPath)
+	if err != nil {
+		return err
+	}
+	defer t.Close()
+	fs, _ := f.Stat()
+	if fs.Size() < offset {
+		return ErrOffsetExceedsFileSize
+	}
+	if limit == 0 || limit+offset > fs.Size() {
+		limit = fs.Size() - offset
+	}
+	o, err := f.Seek(offset, 0)
+	if err != nil || o != offset {
+		return err
+	}
+	fmt.Printf("Coping file %v to file %v", fromPath, toPath)
+	fmt.Println()
+	bar := pb.StartNew(int(limit))
+	for i := offset; i < offset+limit; i += bufsize {
+		copylen := int64(math.Min(bufsize, float64(limit)))
+		c, err := io.CopyN(t, f, copylen)
+		if (err != nil && err != io.EOF) || c > limit {
+			return err
+		}
+		printProgressBar(bar, int(c))
+	}
+	bar.Finish()
 	return nil
+}
+
+func printProgressBar(bar *pb.ProgressBar, lastchunk int) {
+	bar.Add(lastchunk)
+	time.Sleep(time.Millisecond) //для визуализации Progressbar
 }
