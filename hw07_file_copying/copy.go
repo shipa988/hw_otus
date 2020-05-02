@@ -25,11 +25,11 @@ func Copy(fromPath string, toPath string, offset, limit int64) error {
 	if err != nil {
 		return ErrUnsupportedFile
 	}
-	t, err := os.OpenFile(toPath, os.O_RDWR|os.O_CREATE, 0755)
+	defer f.Close()
+	t, err := os.Create(toPath)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 	defer t.Close()
 	fs, _ := f.Stat()
 	if fs.Size() < offset {

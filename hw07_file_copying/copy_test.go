@@ -23,23 +23,26 @@ type testcase struct {
 var testcases []testcase
 
 func TestCopy(t *testing.T) {
-	tmpdir := path.Join(os.TempDir(),"testcopytmp")
+	tmpdir := path.Join(os.TempDir(), "testcopytmp")
 	defer os.RemoveAll(tmpdir)
+
 	from = path.Join("testdata", "input.txt")
 	frominfo, err := os.Lstat(from)
 	if err != nil {
 		log.Fatal("unable to stat from test file")
 	}
 	fromsize := frominfo.Size()
+
 	offsetregx, err := regexp.Compile(`offset(\d+)[_\.]`)
 	if err != nil {
 		log.Fatal("unable to compile regex fo offset")
 	}
+
 	limitregx, err := regexp.Compile(`limit(\d+)[_\.]`)
 	if err != nil {
 		log.Fatal("unable to compile regex fo limit")
 	}
-
+	//bad from file
 	testcases = append(testcases, testcase{
 		from:         "bad_from.txt",
 		to:           newTempFile(tmpdir, ""),
@@ -48,6 +51,7 @@ func TestCopy(t *testing.T) {
 		expectedsize: 0,
 		expectedbyte: []byte{},
 		error:        ErrUnsupportedFile})
+	// offset>from size
 	testcases = append(testcases, testcase{
 		from:         from,
 		to:           newTempFile(tmpdir, ""),
@@ -56,10 +60,13 @@ func TestCopy(t *testing.T) {
 		expectedsize: 0,
 		expectedbyte: []byte{},
 		error:        ErrOffsetExceedsFileSize})
+	//read test out files
 	filepath.Walk("testdata", func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
+
+		//reading only usefull files
 		if strings.Index(info.Name(), "out_") == 0 {
 			setOffset(offsetregx, info)
 			setLimit(limitregx, info)
@@ -76,25 +83,34 @@ func TestCopy(t *testing.T) {
 				expectedsize: info.Size(),
 				error:        nil,
 			})
-
 		}
 		return nil
 	})
+
 	for _, testcase := range testcases {
 		err := Copy(testcase.from, testcase.to, testcase.offset, testcase.limit)
+
+		//must be error
 		if testcase.error != nil {
 			require.Equal(t, testcase.error, err, "expected and actual errors are not equal")
 			continue
 		}
+
+		//without errors
 		require.NoErrorf(t, err, "function Copy returned error")
-		f, err := os.Open(testcase.to)
-		defer f.Close()
+
+		//size check
+		file, err := os.Open(testcase.to)
+		defer file.Close()
 		require.NoError(t, err)
-		s, _ := f.Stat()
-		outf, err := ioutil.ReadAll(f)
+		finfo, _ := file.Stat()
+		require.Equalf(t, testcase.expectedsize, finfo.Size(), "size for file %v with offset %v limit %v", testcase.from, testcase.offset, testcase.limit)
+
+		//content check
+		outfile, err := ioutil.ReadAll(file)
 		require.NoError(t, err)
-		require.Equalf(t, outf, testcase.expectedbyte, "content for file %v with offset %v limit %v", testcase.from, testcase.offset, testcase.limit)
-		require.Equalf(t, testcase.expectedsize, s.Size(), "size for file %v with offset %v limit %v", testcase.from, testcase.offset, testcase.limit)
+		require.Equalf(t, outfile, testcase.expectedbyte, "content for file %v with offset %v limit %v", testcase.from, testcase.offset, testcase.limit)
+
 	}
 
 }
