@@ -46,7 +46,7 @@ func ReadDir(dir string) (Environment, error) {
 	return *env, err
 }
 
-//Read envirnment file and parse inner value
+//Read envirnment file and parse inner value.
 func readValue(path string) (string, error) {
 	file, e := os.Open(path)
 	defer file.Close() //nolint:staticcheck
