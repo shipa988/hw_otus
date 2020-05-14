@@ -41,6 +41,10 @@ func TestRunCmd(t *testing.T) {
 				log.Fatal(e)
 			}
 			cmd.WriteString("#!/usr/bin/env bash\necho -e " + `HELLO is (${HELLO}) arguments are $*">>` + testfile + "\nexit 3")
+			if e = cmd.Chmod(0777); e !=nil{
+				log.Fatal(e)
+				return
+			}
 			cmd.Close()
 		default:
 			log.Fatal("unknown os")
