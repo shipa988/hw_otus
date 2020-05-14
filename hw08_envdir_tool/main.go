@@ -6,10 +6,14 @@ import (
 	"os"
 )
 
+const (
+	minargslen = 2
+)
+
 func main() {
 	flag.Parse()
 	args := flag.Args()
-	if len(args) < 2 {
+	if len(args) < minargslen {
 		log.Fatal("should be at least 2 arguments: dir to environment and execute command")
 	}
 	envdir := args[0]

@@ -13,35 +13,33 @@ import (
 
 func TestRunCmd(t *testing.T) {
 	t.Run("bad cmd", func(t *testing.T) {
-		code := RunCmd([]string{},Environment{})
-		require.Equalf(t,1,code,"should be error code 1")
+		code := RunCmd([]string{}, Environment{})
+		require.Equalf(t, 1, code, "should be error code 1")
 	})
 	t.Run("good cmd", func(t *testing.T) {
-		input := path.Join(os.TempDir(), "mycmd_")
-		defer os.RemoveAll(input)
-		//input, e := ioutil.TempDir("testdata", "mycmd_")
-		//defer os.RemoveAll(input)
+		tempdir, e := ioutil.TempDir("testdata", "mycmd_")
+		defer os.RemoveAll(tempdir)
 
-		testfile:=newTempFile(input, "")
+		testfile := newTempFile(tempdir, "echofile")
 
 		var cmdName string
 		switch runtime.GOOS {
 		case "windows":
-			cmd, e := os.Create(filepath.Join(input, "test.cmd"))
+			cmd, e := os.Create(filepath.Join(tempdir, "test.cmd"))
 			cmdName = cmd.Name()
 			if e != nil {
 				log.Fatal(e)
 			}
-			cmd.WriteString("echo off\r\necho|set /p=\"HELLO is (%HELLO%) arguments are %*\">" + testfile + "\r\nexit 3")
+			cmd.WriteString("echo off\r\necho|set /p=\"HELLO is %HELLO% arguments are %*\">" + testfile + "\r\nexit 3")
 			cmd.Close()
-		case "linux","darwin":
-			cmd, e := os.Create(path.Join(input, "test.sh"))
+		case "linux", "darwin":
+			cmd, e := os.Create(path.Join(tempdir, "test.sh"))
 			cmdName = cmd.Name()
 			if e != nil {
 				log.Fatal(e)
 			}
-			cmd.WriteString("#!/usr/bin/env bash\necho -e " + `HELLO is (${HELLO}) arguments are $*">>` + testfile + "\nexit 3")
-			if e = cmd.Chmod(0777); e !=nil{
+			cmd.WriteString("#!/usr/bin/env bash\necho -e -n \"HELLO is ${HELLO} arguments are $*\">>" + testfile + " && exit 3")
+			if e = cmd.Chmod(0777); e != nil {
 				log.Fatal(e)
 				return
 			}
@@ -53,7 +51,7 @@ func TestRunCmd(t *testing.T) {
 		m := make(map[string]string)
 		m[`HELLO`] = `"hello"`
 		env := Environment(m)
-		expectedString := `HELLO is ("hello") arguments are 1 test`
+		expectedString := `HELLO is "hello" arguments are 1 test`
 
 		code := RunCmd([]string{cmdName, "1", "test"}, env)
 
@@ -73,11 +71,9 @@ func TestRunCmd(t *testing.T) {
 		require.Equal(t, expectedString, string(b), "not expected environment variable and arguments")
 	})
 }
+
+//Create tempfile in "dir" with "templ" template and return filename of tempfile
 func newTempFile(dir, templ string) string {
-	err := os.MkdirAll(dir, os.ModePerm)
-	if err != nil {
-		log.Fatalf("unable to create temp dir fo test. Error: %v", err)
-	}
 	tempFile, err := ioutil.TempFile(dir, "*_"+templ)
 	if err != nil {
 		log.Fatalf("unable to create temp file fo test. Error: %v", err)
@@ -85,4 +81,3 @@ func newTempFile(dir, templ string) string {
 	defer tempFile.Close()
 	return tempFile.Name()
 }
-

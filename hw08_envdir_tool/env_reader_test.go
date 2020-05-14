@@ -71,7 +71,8 @@ with new line`
 		require.NoError(t, e)
 		require.Equal(t, expectedEnv, actualEnv, "environment not equal")
 	})
-	t.Run("bad dir for environment", func(t *testing.T) {
+	t.Run("not exist environment dir", func(t *testing.T) {
+		//env directory not exist
 		input := path.Join("testdata", "myenv_123")
 		actualEnv, e := ReadDir(input)
 

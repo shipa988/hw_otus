@@ -9,6 +9,11 @@ import (
 	"strings"
 )
 
+const (
+	newline   = 0x0a
+	emptybyte = 0x00
+)
+
 type Environment map[string]string
 
 func NewEnvironment() *Environment {
@@ -17,25 +22,6 @@ func NewEnvironment() *Environment {
 }
 func (e *Environment) Add(key, value string) {
 	map[string]string(*e)[key] = value
-}
-
-func readValue(path string) (string, error) {
-	file, e := os.Open(path)
-	defer file.Close()
-	if e != nil {
-		return "", e
-	}
-	r := bufio.NewReader(file)
-	value, e := r.ReadBytes(0x0a)
-	if e != nil && e != io.EOF {
-		return "", e
-	}
-	if e != io.EOF { //found new line
-		value = value[0 : len(value)-1] //trim delimeter
-	}
-	value = bytes.ReplaceAll(value, []byte{0x00}, []byte{0x0a}) //replace 00
-	value = bytes.TrimRight(value, ` \t`)                       //trim space tab
-	return string(value), nil
 }
 
 // ReadDir reads a specified directory and returns map of env variables.
@@ -58,4 +44,24 @@ func ReadDir(dir string) (Environment, error) {
 		return nil
 	})
 	return *env, err
+}
+
+//Read envirnment file and parse inner value
+func readValue(path string) (string, error) {
+	file, e := os.Open(path)
+	defer file.Close() //nolint:staticcheck
+	if e != nil {
+		return "", e
+	}
+	r := bufio.NewReader(file)
+	value, e := r.ReadBytes(newline)
+	if e != nil && e != io.EOF {
+		return "", e
+	}
+	if e != io.EOF { //found new line
+		value = value[0 : len(value)-1] //trim delimeter
+	}
+	value = bytes.ReplaceAll(value, []byte{emptybyte}, []byte{newline}) //replace 00
+	value = bytes.TrimRight(value, ` \t`)                               //trim space tab
+	return string(value), nil
 }

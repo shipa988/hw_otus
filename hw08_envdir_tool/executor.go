@@ -7,11 +7,15 @@ import (
 	"os/exec"
 )
 
+const (
+	errorcode = 1
+)
+
 // RunCmd runs a command + arguments (cmd) with environment variables from env
 func RunCmd(cmd []string, env Environment) (returnCode int) {
 	if len(cmd) == 0 {
 		log.Println("cmd args is empty")
-		return 1
+		return errorcode
 	}
 
 	name := cmd[0]
@@ -30,7 +34,7 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 	}
 	go func() {
 		defer stdin.Close()
-		io.Copy(stdin, os.Stdin)
+		io.Copy(stdin, os.Stdin) //nolint:errcheck
 	}()
 
 	command.Stdout = os.Stdout
