@@ -17,11 +17,9 @@ func TestGenCode(t *testing.T) {
 		require.NoFileExists(t, "fileNotExist_validation.go", "*_validation.go file should not be generate")
 	})
 	t.Run("simple test", func(t *testing.T) {
-		input, e := ioutil.TempDir(".\\", "testpackage")
-		//defer os.RemoveAll(input)
-		if e != nil {
-			log.Fatalf("can't create temp dir with error: %s", e)
-		}
+		input, e := newTempDir("test")
+		defer os.RemoveAll("test")
+
 		fname := filepath.Join(input, "test.go")
 		fnameValitator := filepath.Join(input, "test_validation_generated.go")
 		f, e := os.Create(fname)
@@ -70,4 +68,17 @@ func TestGenCode(t *testing.T) {
 		require.FileExists(t, fnameValitator, "*_validation_generated.go file will not generate")
 
 	})
+}
+
+//newTempDir create tempDir returns it name,error.
+func newTempDir(dir string) (string, error) {
+	err := os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		log.Fatalf("unable to create temp dir fo test. Error: %v", err)
+	}
+	input, e := ioutil.TempDir(dir, "testpackage")
+	if e != nil {
+		log.Fatalf("can't create temp dir with error: %s", e)
+	}
+	return input, e
 }

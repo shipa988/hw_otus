@@ -1,4 +1,3 @@
-//nolint:godot
 package main
 
 import (
