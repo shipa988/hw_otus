@@ -17,7 +17,7 @@ func TestGenCode(t *testing.T) {
 		require.NoFileExists(t, "fileNotExist_validation.go", "*_validation.go file should not be generate")
 	})
 	t.Run("simple test", func(t *testing.T) {
-		input, e := ioutil.TempDir(".\\", "testpackage")
+		input, e := ioutil.TempDir("", "testpackage")
 		defer os.RemoveAll(input)
 		if e != nil {
 			log.Fatalf("can't create temp dir with error: %s", e)
