@@ -1,5 +1,3 @@
-// +build generation
-
 package models
 
 import (
