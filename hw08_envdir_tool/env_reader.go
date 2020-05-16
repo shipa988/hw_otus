@@ -16,12 +16,12 @@ const (
 
 type Environment map[string]string
 
-func NewEnvironment() *Environment {
+func NewEnvironment() Environment {
 	env := Environment(make(map[string]string))
-	return &env
+	return env
 }
-func (e *Environment) Add(key, value string) {
-	map[string]string(*e)[key] = value
+func (e Environment) Add(key, value string) {
+	e[key]=value
 }
 
 // ReadDir reads a specified directory and returns map of env variables.
@@ -43,7 +43,7 @@ func ReadDir(dir string) (Environment, error) {
 		env.Add(key, value)
 		return nil
 	})
-	return *env, err
+	return env, err
 }
 
 //Read envirnment file and parse inner value.
