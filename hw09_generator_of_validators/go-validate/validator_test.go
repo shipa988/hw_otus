@@ -10,6 +10,8 @@ import (
 	"testing"
 )
 
+const tempD = "test"
+
 func TestGenCode(t *testing.T) {
 	t.Run("not exist .go filename", func(t *testing.T) {
 		e := GenValidate("fileNotExist.go")
@@ -17,7 +19,6 @@ func TestGenCode(t *testing.T) {
 		require.NoFileExists(t, "fileNotExist_validation.go", "*_validation.go file should not be generate")
 	})
 	t.Run("simple test", func(t *testing.T) {
-		tempD := "test"
 		newTempDir(tempD)
 		defer os.RemoveAll(tempD)
 
@@ -45,13 +46,11 @@ func TestGenCode(t *testing.T) {
 		require.True(t, strings.Contains(string(b), "CODE GENERATED AUTOMATICALLY"), "disclaimer is absent")
 	})
 	t.Run("bad tag values int len:one hundred", func(t *testing.T) {
-		input, e := ioutil.TempDir(".\\", "testpackage")
-		defer os.RemoveAll(input)
-		if e != nil {
-			log.Fatalf("can't create temp dir with error: %s", e)
-		}
-		fname := filepath.Join(input, "test.go")
-		fnameValitator := filepath.Join(input, "test_validation_generated.go")
+		newTempDir(tempD)
+		defer os.RemoveAll(tempD)
+
+		fname := filepath.Join(tempD, "test.go")
+		fnameValitator := filepath.Join(tempD, "test_validation_generated.go")
 		f, e := os.Create(fname)
 		defer f.Close()
 		if e != nil {
