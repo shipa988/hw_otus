@@ -1,3 +1,4 @@
+//nolint:godot
 package main
 
 import (
@@ -256,7 +257,7 @@ Err error
 	return nil
 }
 
-//getValidatingStruct parse the .go file and extract all structs to []structTemplate
+//getValidatingStruct parse the .go file and extract all structs to []structTemplate.
 func getValidatingStruct(node *ast.File) ([]structTemplate, error) {
 	validateStructs := []structTemplate{}
 
@@ -312,7 +313,7 @@ func getValidatingStruct(node *ast.File) ([]structTemplate, error) {
 	return validateStructs, nil
 }
 
-//getTrueType returns base type for type
+//getTrueType returns base type for type.
 func getTrueType(fieldType string, node *ast.File) string {
 	if fieldType == "int" || fieldType == "string" {
 		return fieldType
@@ -343,7 +344,7 @@ func getTrueType(fieldType string, node *ast.File) string {
 	return fieldType
 }
 
-//fieldToValidator returns  Field type from tag
+//fieldToValidator returns  Field type from tag.
 func fieldToValidator(fieldName, fieldType, tag string) (Field, error) {
 	field := NewField(fieldName, fieldType)
 
@@ -369,7 +370,7 @@ func fieldToValidator(fieldName, fieldType, tag string) (Field, error) {
 	return field, nil
 }
 
-//paramToValidator parse tag
+//paramToValidator parse tag.
 func paramToValidator(field *Field, key, value string) error {
 	switch key {
 	case _len:
