@@ -33,6 +33,7 @@ func (user User) Validate() ([]ValidationError, error) {
 			Err:   fmt.Errorf("field Age with value:%v smaller than min value %v", user.Age, 18),
 		})
 	}
+
 	if user.Age > 50 {
 		ve = append(ve, ValidationError{
 			Field: "Age",
