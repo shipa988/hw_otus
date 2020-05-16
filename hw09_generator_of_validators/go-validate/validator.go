@@ -209,7 +209,7 @@ return ve,nil
 `))
 )
 
-//GenValidate generate Validate functions for struct in validating .go file
+//GenValidate generate Validate functions for struct in validating .go file.
 func GenValidate(fname string) error {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, fname, nil, parser.ParseComments)
