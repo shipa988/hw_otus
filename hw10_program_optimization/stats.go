@@ -30,7 +30,7 @@ type User struct {
 
 type DomainStat map[string]int
 
-//GetDomainStat read json data from r and returns  DomainStat of domain and first error
+//GetDomainStat read json data from r and returns  DomainStat of domain and first error.
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 	u, err := getUsers(r)
 	if err != nil {
@@ -41,7 +41,7 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 
 type users [100_000]User
 
-//getUsers read json data from r and returns []User array and error
+//getUsers read json data from r and returns []User array and error.
 func getUsers(r io.Reader) (result users, err error) {
 	scanner := bufio.NewScanner(r)
 	json := jsoniter.ConfigCompatibleWithStandardLibrary
@@ -63,7 +63,7 @@ func getUsers(r io.Reader) (result users, err error) {
 	return
 }
 
-//countDomains read []User array and returns DomainStat of domain and first error
+//countDomains read []User array and returns DomainStat of domain and first error.
 func countDomains(u users, domain string) (result DomainStat, err error) {
 	result = make(DomainStat)
 	lendomain := len(domain)
