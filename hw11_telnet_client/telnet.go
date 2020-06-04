@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"net"
@@ -42,7 +43,28 @@ func (c *client) Close() error {
 }
 
 func (c *client) Send() (e error) {
-	_,e=io.Copy(c.connection,c.in)
+	//_,e=io.Copy(c.connection,c.in)
+	//return
+
+	scanner := bufio.NewScanner(c.in)
+//OUTER:
+	for {
+		select {
+		//case <-ctx.Done():
+		//	break OUTER
+		default:
+			if !scanner.Scan() {
+				return fmt.Errorf("cannot scan in")
+			}
+			text := scanner.Text()
+			_,e=fmt.Fprint(c.connection,text)
+			if e!=nil{
+				fmt.Println("dcscs",e)
+				return
+			}
+		}
+	}
+	fmt.Println("dcscs",e)
 	return
 	/*_,e:=c.in.Read(c.inbuf)
 	if e!=nil{
@@ -58,9 +80,8 @@ func (c *client) Send() (e error) {
 func (c *client) Receive() (e error) {
 	_,e=io.Copy(c.out,c.connection)
 	return
-	/*c.connection.Read(c.outbuf)
-	c.out.Write()
-scanner := bufio.NewScanner(c.connection)
+
+/*scanner := bufio.NewScanner(c.connection)
 	OUTER:
 		for {
 			select {

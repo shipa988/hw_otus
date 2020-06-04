@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	//"context"
 	"flag"
 	"fmt"
 	"log"
@@ -15,15 +15,15 @@ import (
 var timeout string
 
 func init() {
-	flag.StringVar(&timeout, "-timeout", "10s", "enter connection timeout")
+	flag.StringVar(&timeout, "timeout", "10s", "enter connection timeout")
 }
-
+var wg *sync.WaitGroup
 func main() {
 	flag.Parse()
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGQUIT, syscall.SIGINT)
 
-	wg:=&sync.WaitGroup{}
+	wg=&sync.WaitGroup{}
 
 	args := flag.Args()
 	if len(args) <= 1 {
@@ -41,54 +41,41 @@ func main() {
 	if err != nil {
 		log.Fatal("Connect err")
 	}
-	ctx, cancel := context.WithCancel(context.Background())
+	//fmt.Println("Connect to server: ",fmt.Sprintf("%s:%s", host, port))
+	//ctx, cancel := context.WithCancel(context.Background())
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		select {
 		case _ = <-c:
 			fmt.Println("signal")
-			cancel()
+			client.Close()
+			//cancel()
 		}
 
 
 	}()
-
-
-	wg.Add(2)
-	go readRoutine(ctx, client)
-	go writeRoutine(ctx, client)
+	go readRoutine( client)
+	go writeRoutine(client)
+	wg.Wait()
+	//client.Close()
 }
 
-func readRoutine(ctx context.Context, telnetClient TelnetClient) {
-	var err error
-OUTER:
-	for {
-		select {
-		case <-ctx.Done():
-			break OUTER
-		default:
-			err = telnetClient.Receive()
-			if err != nil {
-				break OUTER
-			}
-		}
+func readRoutine(telnetClient TelnetClient) {
+	defer wg.Done()
+	err:= telnetClient.Receive()
+	if err != nil {
+		return
 	}
-	log.Printf("Finished readRoutine")
 }
 
-func writeRoutine(ctx context.Context, telnetClient TelnetClient) {
-	var err error
-OUTER:
-	for {
-		select {
-		case <-ctx.Done():
-			break OUTER
-		default:
-			err = telnetClient.Send()
-			if err != nil {
-				break OUTER
-			}
-		}
-
+func writeRoutine(telnetClient TelnetClient) {
+	defer wg.Done()
+	err:= telnetClient.Send()
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("...Connection was closed by peer")
+		return
 	}
-	log.Printf("Finished writeRoutine")
+
 }
