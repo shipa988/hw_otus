@@ -36,7 +36,7 @@ func TestGetDomainStat_Time_And_Memory(t *testing.T) {
 		b.StopTimer()
 		require.NoError(t, err)
 
-		require.Equal(t, stat, expectedBizStat)
+		require.Equal(t, expectedBizStat, stat)
 	}
 
 	result := testing.Benchmark(bench)
