@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"net"
@@ -28,10 +27,7 @@ type client struct {
 }
 
 func (c *client) Connect() (e error) {
-	d:=net.Dialer{
-		Timeout:       c.timeout,
-	}
-	c.connection, e= d.Dial("tcp", c.address)
+	c.connection, e= net.DialTimeout("tcp", c.address,c.timeout)
 	return
 }
 
@@ -43,10 +39,10 @@ func (c *client) Close() error {
 }
 
 func (c *client) Send() (e error) {
-	//_,e=io.Copy(c.connection,c.in)
-	//return
+	_,e=io.Copy(c.connection,c.in)
+	return
 
-	scanner := bufio.NewScanner(c.in)
+	/*scanner := bufio.NewScanner(c.in)
 //OUTER:
 	for {
 		select {
@@ -57,14 +53,14 @@ func (c *client) Send() (e error) {
 				return fmt.Errorf("cannot scan in")
 			}
 			text := scanner.Text()
-			_,e=fmt.Fprint(c.connection,text)
+			_,e=fmt.Fprintln(c.connection,text)
 			if e!=nil{
-				fmt.Println("dcscs",e)
+				fmt.Println(e)
 				return
 			}
 		}
 	}
-	fmt.Println("dcscs",e)
+	fmt.Println(e)
 	return
 	/*_,e:=c.in.Read(c.inbuf)
 	if e!=nil{

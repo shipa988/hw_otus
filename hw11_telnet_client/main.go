@@ -5,13 +5,14 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
 )
-
+var timeoutError="Timeout while connecting to server"
 var timeout string
 
 func init() {
@@ -35,30 +36,24 @@ func main() {
 	if e != nil {
 		log.Fatal("Please enter correct timeout value")
 	}
-	client := NewTelnetClient(fmt.Sprintf("%s:%s", host, port), t, os.Stdin, os.Stdout)
+	client := NewTelnetClient(net.JoinHostPort( host, port), t, os.Stdin, os.Stdout)
 
 	err := client.Connect()
 	if err != nil {
-		log.Fatal("Connect err")
+		log.Fatal(timeoutError)
 	}
-	//fmt.Println("Connect to server: ",fmt.Sprintf("%s:%s", host, port))
+	fmt.Fprintf(os.Stderr,"...Connected to %v\n",net.JoinHostPort( host, port))
 	//ctx, cancel := context.WithCancel(context.Background())
-	wg.Add(1)
+	wg.Add(2)
 	go func() {
-		defer wg.Done()
 		select {
 		case _ = <-c:
-			fmt.Println("signal")
-			client.Close()
-			//cancel()
+			os.Exit(1)
 		}
-
-
 	}()
-	go readRoutine( client)
+	go readRoutine(client)
 	go writeRoutine(client)
 	wg.Wait()
-	//client.Close()
 }
 
 func readRoutine(telnetClient TelnetClient) {
@@ -73,9 +68,9 @@ func writeRoutine(telnetClient TelnetClient) {
 	defer wg.Done()
 	err:= telnetClient.Send()
 	if err != nil {
-		fmt.Println(err)
-		fmt.Println("...Connection was closed by peer")
+		fmt.Fprintf(os.Stderr,"...Connection was closed by peer\n")
 		return
 	}
-
+	fmt.Fprintf(os.Stderr,"...EOF\n")
+	telnetClient.Close()
 }
