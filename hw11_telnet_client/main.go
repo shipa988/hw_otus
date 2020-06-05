@@ -65,6 +65,7 @@ func readRoutine(telnetClient TelnetClient) {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
 		return
 	}
+	fmt.Fprintf(os.Stderr, "%v\n", "First read")
 }
 
 func writeRoutine(telnetClient TelnetClient) {
@@ -73,6 +74,7 @@ func writeRoutine(telnetClient TelnetClient) {
 		fmt.Fprintf(os.Stderr, "...Connection was closed by peer\n") //an error occurs if server sent ctrl + c (close) and client execute some unsuccessful attempts to send
 		return
 	}
+	fmt.Fprintf(os.Stderr, "%v\n", "First write")
 	fmt.Fprintf(os.Stderr, "...EOF\n") //if client sent ctrl+d
 	telnetClient.Close()
 }

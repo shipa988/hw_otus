@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -xeu pipefail
+set -xeuo pipefail
 
 go build -o go-telnet
 
