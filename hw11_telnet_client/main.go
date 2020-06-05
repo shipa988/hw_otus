@@ -55,7 +55,13 @@ func main() {
 	wg = &sync.WaitGroup{}
 	wg.Add(2)
 	go readRoutine(client)
-	time.Sleep(time.Millisecond*100)
+	//ох..., я думаю дело в этом.
+	//В bash тестах события записи на сервер и чтения с сервера возникают для клиента одновременно и
+	//когда шедулер go решает запустить первой writeRoutine, то после отправки на сервер сообщения и получения EOF
+	//клиент закрывает соединение согласно ТЗ-и тогда readRoutine не успевает принять сообщение с сервера.-тест фейлится (это происходит в случайном порядке)
+	//
+	//*однако если  readRoutine запустить первой-тесты проходят всегда-так как сообщение успевает приняться с сервера...
+	time.Sleep(time.Millisecond * 100)
 	go writeRoutine(client)
 	wg.Wait()
 }
@@ -74,8 +80,6 @@ func writeRoutine(telnetClient TelnetClient) {
 		fmt.Fprintf(os.Stderr, "...Connection was closed by peer\n") //an error occurs if server sent ctrl + c (close) and client execute some unsuccessful attempts to send
 		return
 	}
-	fmt.Fprintf(os.Stderr, "%v\n", "First write")
 	fmt.Fprintf(os.Stderr, "...EOF\n") //if client sent ctrl+d
-
 	telnetClient.Close()
 }
