@@ -58,5 +58,5 @@ func (c *client) Receive() (e error) {
 
 //NewTelnetClient returns client with fields address,timeout,Reader and Writer.
 func NewTelnetClient(address string, timeout time.Duration, in io.ReadCloser, out io.Writer) TelnetClient {
-	return &client{address: address, timeout: timeout, in: in, out: out,}
+	return &client{address: address, timeout: timeout, in: in, out: out}
 }

@@ -40,10 +40,8 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT) //ctrl+d it's EOF
 	go func() {
-		select {
-		case _ = <-c:
-			os.Exit(1) //only SIGINT
-		}
+		<-c
+		os.Exit(1) //only SIGINT
 	}()
 
 	client := NewTelnetClient(net.JoinHostPort(host, port), timeout, os.Stdin, os.Stdout)
@@ -54,7 +52,7 @@ func main() {
 	}
 	fmt.Fprintf(os.Stderr, "...Connected to %v\n", net.JoinHostPort(host, port))
 
-	wg=&sync.WaitGroup{}
+	wg = &sync.WaitGroup{}
 	wg.Add(2)
 	go readRoutine(client)
 	go writeRoutine(client)
@@ -63,13 +61,15 @@ func main() {
 
 func readRoutine(telnetClient TelnetClient) {
 	defer wg.Done()
-	telnetClient.Receive()//if server close connect this routine is exit but we wait some unsuccessful attempts to send in writeRoutine
+	if e := telnetClient.Receive(); e != nil { //if server close connect this routine is exit but we wait some unsuccessful attempts to send in writeRoutine
+		fmt.Fprintf(os.Stderr, "%v\n", e)
+		return
+	}
 }
 
 func writeRoutine(telnetClient TelnetClient) {
 	defer wg.Done()
-	err := telnetClient.Send()
-	if err != nil {
+	if e := telnetClient.Send(); e != nil {
 		fmt.Fprintf(os.Stderr, "...Connection was closed by peer\n") //an error occurs if server sent ctrl + c (close) and client execute some unsuccessful attempts to send
 		return
 	}
