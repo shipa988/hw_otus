@@ -55,6 +55,7 @@ func main() {
 	wg = &sync.WaitGroup{}
 	wg.Add(2)
 	go readRoutine(client)
+	time.Sleep(time.Millisecond*100)
 	go writeRoutine(client)
 	wg.Wait()
 }
@@ -65,7 +66,6 @@ func readRoutine(telnetClient TelnetClient) {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
 		return
 	}
-	fmt.Fprintf(os.Stderr, "%v\n", "First read")
 }
 
 func writeRoutine(telnetClient TelnetClient) {
@@ -76,5 +76,6 @@ func writeRoutine(telnetClient TelnetClient) {
 	}
 	fmt.Fprintf(os.Stderr, "%v\n", "First write")
 	fmt.Fprintf(os.Stderr, "...EOF\n") //if client sent ctrl+d
+
 	telnetClient.Close()
 }
