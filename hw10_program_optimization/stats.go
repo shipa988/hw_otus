@@ -1,26 +1,36 @@
 package hw10_program_optimization //nolint:golint,stylecheck
 
 import (
-	"encoding/json"
+	"bufio"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"regexp"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
+)
+
+const (
+	sabaken = "@"
+)
+
+var (
+	user      User
+	userCount int
 )
 
 type User struct {
-	ID       int
-	Name     string
-	Username string
+	ID       int    `json:"-"`
+	Name     string `json:"-"`
+	Username string `json:"-"`
 	Email    string
-	Phone    string
-	Password string
-	Address  string
+	Phone    string `json:"-"`
+	Password string `json:"-"`
+	Address  string `json:"-"`
 }
 
 type DomainStat map[string]int
 
+//GetDomainStat read json data from r and returns  DomainStat of domain and first error.
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 	u, err := getUsers(r)
 	if err != nil {
@@ -31,37 +41,44 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 
 type users [100_000]User
 
+//getUsers read json data from r and returns []User array and error.
 func getUsers(r io.Reader) (result users, err error) {
-	content, err := ioutil.ReadAll(r)
-	if err != nil {
-		return
-	}
+	scanner := bufio.NewScanner(r)
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
 
-	lines := strings.Split(string(content), "\n")
-	for i, line := range lines {
-		var user User
-		if err = json.Unmarshal([]byte(line), &user); err != nil {
+	i := 0
+	for scanner.Scan() {
+		err = json.Unmarshal(scanner.Bytes(), &user)
+		if err != nil {
 			return
 		}
 		result[i] = user
+		i++
 	}
+
+	if err = scanner.Err(); err != nil {
+		return
+	}
+	userCount = i // for truncate users in countDomains
 	return
 }
 
-func countDomains(u users, domain string) (DomainStat, error) {
-	result := make(DomainStat)
-
-	for _, user := range u {
-		matched, err := regexp.Match("\\."+domain, []byte(user.Email))
-		if err != nil {
-			return nil, err
-		}
-
-		if matched {
-			num := result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]
-			num++
-			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = num
+//countDomains read []User array and returns DomainStat of domain and first error.
+func countDomains(u users, domain string) (result DomainStat, err error) {
+	result = make(DomainStat)
+	lendomain := len(domain)
+	var email string
+	var emailParts []string
+	for _, user = range u[:userCount] {
+		if strings.LastIndex(user.Email, domain) == len(user.Email)-lendomain { //replace regex
+			email = strings.ToLower(user.Email)
+			emailParts = strings.Split(email, sabaken)
+			if err == nil && len(emailParts) <= 1 || len(emailParts) > 2 {
+				err = fmt.Errorf("invalid email %v", user.Email)
+				continue
+			}
+			result[emailParts[1]]++
 		}
 	}
-	return result, nil
+	return result, err
 }
