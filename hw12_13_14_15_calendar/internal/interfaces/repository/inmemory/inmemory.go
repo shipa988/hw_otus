@@ -8,8 +8,8 @@ import (
 
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
-	"github.com/shipa988/otus/hw12_13_14_15_calendar/internal/domain"
-	"github.com/shipa988/otus/hw12_13_14_15_calendar/internal/usecases"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/domain"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/usecases"
 )
 
 var _ domain.EventRepo = (*EventRepo)(nil)

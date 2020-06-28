@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/shipa988/otus/hw12_13_14_15_calendar/internal/domain"
-	"github.com/shipa988/otus/hw12_13_14_15_calendar/internal/interfaces"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/domain"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/interfaces"
 )
 
 const (

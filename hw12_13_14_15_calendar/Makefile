@@ -24,7 +24,9 @@ build:
 	go build $(BUILDPATH)
 test:
 	go test -v -race ./...
-lint: fmt tidy
+prepare_lint:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint
+lint: prepare_lint fmt tidy
 	golangci-lint run ./...
 fmt:
 	go fmt ./...

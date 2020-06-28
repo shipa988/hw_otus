@@ -6,7 +6,7 @@ import (
 	"os"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/shipa988/otus/hw12_13_14_15_calendar/internal/infrastructure"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/infrastructure"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

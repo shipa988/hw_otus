@@ -9,8 +9,8 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
-	"github.com/shipa988/otus/hw12_13_14_15_calendar/internal/domain"
-	"github.com/shipa988/otus/hw12_13_14_15_calendar/internal/usecases"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/domain"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/usecases"
 	"github.com/stretchr/testify/require"
 )
 
@@ -115,14 +115,14 @@ func TestDBEventRepo_GetForPeriod(t *testing.T) {
 			AddRow(testid, "title", testdt_str, 360, "text", testid, 360)
 
 		mock.ExpectQuery(`select id, title, datetime, duration, text, userid, timenotify from`).
-			WithArgs(time.Now(), time.Now()).
+			WithArgs(testdt, testdt).
 			WillReturnRows(rows)
 
 		var expectedEvents []*domain.Event
 		expectedEvent := newFakeEvent(testid)
 		expectedEvents = append(expectedEvents, &expectedEvent)
 
-		events, err := dbe.GetForPeriod(ctx, time.Now(), time.Now())
+		events, err := dbe.GetForPeriod(ctx, testdt, testdt)
 		require.Equal(t, expectedEvents, events)
 		require.Nil(t, err)
 
@@ -141,13 +141,13 @@ func TestDBEventRepo_GetForPeriod(t *testing.T) {
 
 		rows := sqlmock.NewRows([]string{"id", "title", "dateTime", "duration", "text", "userId", "timeNotify"})
 		mock.ExpectQuery(`select id, title, datetime, duration, text, userid, timenotify from`).
-			WithArgs(time.Now(), time.Now()).
+			WithArgs(testdt, testdt).
 			WillReturnRows(rows)
 
 		dbe := EventRepo{db: db, logger: nil}
 		var expectedEvents []*domain.Event //nil
 
-		events, err := dbe.GetForPeriod(ctx, time.Now(), time.Now())
+		events, err := dbe.GetForPeriod(ctx, testdt, testdt)
 
 		require.Equalf(t, expectedEvents, events, "")
 		require.Equal(t, domain.ErrEventNotFound, err, "should return event not found")
@@ -166,15 +166,15 @@ func TestDBEventRepo_GetForPeriod(t *testing.T) {
 		ctx := context.TODO()
 
 		mock.ExpectQuery(`select id, title, datetime, duration, text, userid, timenotify from`).
-			WithArgs(time.Now(), time.Now()).
+			WithArgs(testdt, testdt).
 			WillReturnError(sql.ErrConnDone)
 
 		dbe := EventRepo{db: db, logger: nil}
 		var expectedEvents []*domain.Event //nil
 
-		events, err := dbe.GetForPeriod(ctx, time.Now(), time.Now())
+		events, err := dbe.GetForPeriod(ctx, testdt, testdt)
 		require.Equalf(t, expectedEvents, events, "")
-		require.Truef(t, errors.Is(err, sql.ErrConnDone), "GetByID not return cause error")
+		require.Truef(t, errors.Is(err, sql.ErrConnDone), "GetForPeriod not return cause error")
 
 		if err := mock.ExpectationsWereMet(); err != nil {
 			t.Errorf("there were unfulfilled expectations: %s", err)

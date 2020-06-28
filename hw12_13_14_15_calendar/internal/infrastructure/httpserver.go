@@ -9,8 +9,8 @@ import (
 
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
-	"github.com/shipa988/otus/hw12_13_14_15_calendar/internal/interfaces"
-	"github.com/shipa988/otus/hw12_13_14_15_calendar/internal/usecases"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/interfaces"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/usecases"
 )
 
 type contextKey string

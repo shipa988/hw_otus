@@ -1,16 +1,17 @@
 package infrastructure
 
 import (
-	"github.com/pkg/errors"
-	"github.com/shipa988/otus/hw12_13_14_15_calendar/internal/domain"
-	"github.com/shipa988/otus/hw12_13_14_15_calendar/internal/interfaces/repository/db"
-	"github.com/shipa988/otus/hw12_13_14_15_calendar/internal/interfaces/repository/inmemory"
-	"github.com/shipa988/otus/hw12_13_14_15_calendar/internal/usecases"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/domain"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/interfaces/repository/db"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/interfaces/repository/inmemory"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/usecases"
 
 	"net"
 	"os"
 	"os/signal"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 type App struct {
