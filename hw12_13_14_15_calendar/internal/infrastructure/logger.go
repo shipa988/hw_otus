@@ -9,7 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
-	"github.com/shipa988/otus/hw12_13_14_15_calendar/internal/usecases"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/usecases"
 )
 
 var _ usecases.ILogger = (*Logger)(nil)
