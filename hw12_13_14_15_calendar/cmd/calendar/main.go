@@ -6,13 +6,14 @@ import (
 	"os"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/infrastructure"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal"
 )
 
 var cfgFile string
-var cfg *infrastructure.AppConfig
+var cfg *internal.AppConfig
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
@@ -27,7 +28,7 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		app := infrastructure.NewApp()
+		app := internal.NewApp()
 		isdebug, err := cmd.Flags().GetBool("debug")
 		if err != nil {
 			log.Fatal("can't read flag debug")
@@ -75,7 +76,7 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(err)
 	}
-	cfg = &infrastructure.AppConfig{}
+	cfg = &internal.AppConfig{}
 	err := viper.Unmarshal(cfg)
 	if err != nil {
 		log.Fatal(err)

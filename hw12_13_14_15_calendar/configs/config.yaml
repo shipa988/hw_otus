@@ -2,7 +2,9 @@ log:
   file:  ./calendar.log
   level:  info
 api:
-  port:  4444
+  httpport:  4444
+  grpcport:  4445
+  grpcgwport:  4446
 repotype: db
 db:
   dsn:  host=localhost port=5432 user=igor password=igor dbname=calendar sslmode=disable
