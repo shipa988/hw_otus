@@ -1,7 +1,7 @@
 version: "3.7"
 
 services:
-  postgresql:
+  db:
     container_name: db
     image: postgres
     ports:
