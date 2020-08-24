@@ -79,7 +79,6 @@ start_scheduler:
 	$(BUILD_SCHEDULER) --config $(CONFIG_SCHEDULER_PATH) --debug run
 start_sender:
 	$(BUILD_SENDER) --config $(CONFIG_SENDER_PATH) --debug run
-
 test:
 	go test -race ./...
 testv:
