@@ -122,7 +122,7 @@ func TestDBEventRepo_GetForPeriod(t *testing.T) {
 		expectedEvent := addID(newFakeEvent(), testid)
 		expectedEvents = append(expectedEvents, &expectedEvent)
 
-		events, err := dbe.GetForPeriod(ctx, testid, testdt, testdt)
+		events, err := dbe.GetForPeriodByUserID(ctx, testid, testdt, testdt)
 
 		if mockerr := mock.ExpectationsWereMet(); mockerr != nil {
 			t.Errorf("there were unfulfilled expectations: %s", mockerr)
@@ -146,17 +146,15 @@ func TestDBEventRepo_GetForPeriod(t *testing.T) {
 			WillReturnRows(rows)
 
 		dbe := EventRepo{db: db, logger: nil}
-		var expectedEvents []*entities.Event //nil
+		expectedEvents := []*entities.Event{}
 
-		events, err := dbe.GetForPeriod(ctx, testid, testdt, testdt)
+		events, err := dbe.GetForPeriodByUserID(ctx, testid, testdt, testdt)
 
 		if mockerr := mock.ExpectationsWereMet(); mockerr != nil {
 			t.Errorf("there were unfulfilled expectations: %s", mockerr)
 		}
 
 		require.Equalf(t, expectedEvents, events, "")
-		require.Equal(t, entities.ErrEventNotFound, err, "should return event not found")
-
 	})
 	t.Run("return error: get event for period", func(t *testing.T) {
 		db, mock, err := sqlmock.New()
@@ -174,14 +172,73 @@ func TestDBEventRepo_GetForPeriod(t *testing.T) {
 		dbe := EventRepo{db: db, logger: nil}
 		var expectedEvents []*entities.Event //nil
 
-		events, err := dbe.GetForPeriod(ctx, testid, testdt, testdt)
+		events, err := dbe.GetForPeriodByUserID(ctx, testid, testdt, testdt)
 
 		if mockerr := mock.ExpectationsWereMet(); mockerr != nil {
 			t.Errorf("there were unfulfilled expectations: %s", mockerr)
 		}
 
 		require.Equalf(t, expectedEvents, events, "")
-		require.Truef(t, errors.Is(err, sql.ErrConnDone), "GetForPeriod not return cause error")
+		require.Truef(t, errors.Is(err, sql.ErrConnDone), "GetForPeriodByUserID not return cause error")
+
+	})
+}
+func TestDBEventRepo_GetbyNotifyDate(t *testing.T) {
+	t.Run("good test: get event by notify date", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer db.Close()
+
+		dbe := EventRepo{db: db, logger: nil}
+
+		ctx := context.TODO()
+
+		rows := sqlmock.NewRows([]string{"id", "title", "dateTime", "duration", "text", "userId", "timenotify"}).
+			AddRow(testid, "title", testdt, 360, "text", testid, 172800)
+
+		mock.ExpectQuery(`select id, title, datetime, duration, text, userid, timenotify from`).
+			WithArgs(testdt.AddDate(0, 0, -2)).
+			WillReturnRows(rows)
+
+		var expectedEvents []*entities.Event
+		expectedEvent := addID(newFakeEvent("172800s"), testid)
+		expectedEvents = append(expectedEvents, &expectedEvent)
+
+		events, err := dbe.GetByNotifyDate(ctx, testdt.AddDate(0, 0, -2))
+
+		if mockerr := mock.ExpectationsWereMet(); mockerr != nil {
+			t.Errorf("there were unfulfilled expectations: %s", mockerr)
+		}
+
+		require.Equal(t, expectedEvents, events)
+		require.Nil(t, err)
+	})
+	t.Run("no rows: get event for period", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer db.Close()
+
+		ctx := context.TODO()
+
+		rows := sqlmock.NewRows([]string{"id", "title", "dateTime", "duration", "text", "userId", "timeNotify"})
+		mock.ExpectQuery(`select id, title, datetime, duration, text, userid, timenotify from`).
+			WithArgs(testdt.AddDate(0, 0, -2)).
+			WillReturnRows(rows)
+
+		dbe := EventRepo{db: db, logger: nil}
+		expectedEvents := []*entities.Event{}
+
+		events, err := dbe.GetByNotifyDate(ctx, testdt.AddDate(0, 0, -2))
+
+		if mockerr := mock.ExpectationsWereMet(); mockerr != nil {
+			t.Errorf("there were unfulfilled expectations: %s", mockerr)
+		}
+
+		require.Equalf(t, expectedEvents, events, "")
 
 	})
 }
@@ -297,8 +354,12 @@ func TestEventConversion(t *testing.T) {
 	})
 }
 
-func newFakeEvent() entities.Event {
-	e, _ := entities.NewEvent("title", testdt_str, "6m", "text", testid, "6m")
+func newFakeEvent(timeNotify ...string) entities.Event {
+	tn := "6m"
+	if len(timeNotify) > 0 {
+		tn = timeNotify[0]
+	}
+	e, _ := entities.NewEvent("title", testdt_str, "6m", "text", testid, tn)
 	return *e
 }
 func addID(e entities.Event, id string) entities.Event {

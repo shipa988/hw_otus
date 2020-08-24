@@ -5,8 +5,9 @@ import (
 	"time"
 )
 
-type NotifyRepo interface {
-	Add(ctx context.Context, alert Notify) error
+type NotifyQueue interface {
+	Pull(ctx context.Context, alert chan<- Notify) error
+	Push(Notify) error
 }
 
 type Notify struct {
