@@ -79,10 +79,12 @@ start_scheduler:
 	$(BUILD_SCHEDULER) --config $(CONFIG_SCHEDULER_PATH) --debug run
 start_sender:
 	$(BUILD_SENDER) --config $(CONFIG_SENDER_PATH) --debug run
+
 test:
 	go test -race ./...
 testv:
 	go test -v -race ./...
+
 prepare_lint:
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
 prepare_gen:
@@ -95,6 +97,7 @@ lint: prepare_lint fmt tidy
 	golangci-lint run ./...
 fmt:
 	go fmt ./...
+
 migrate_db_up: create-db
 	timeout 5
 	goose -dir $(MIGRATIONPATH) postgres $(PGCONNSTRING) up
