@@ -362,6 +362,7 @@ func newFakeEvent(timeNotify ...string) entities.Event {
 	e, _ := entities.NewEvent("title", testdt_str, "6m", "text", testid, tn)
 	return *e
 }
+
 func addID(e entities.Event, id string) entities.Event {
 	e.ID = id
 	return e

@@ -143,6 +143,7 @@ func (repo *EventRepo) GetForPeriod(ctx context.Context, dateStart time.Time, da
 
 	return repo.rowsToEvents(rows, fmt.Sprintf(ErrGetForPeriod, dateStart, dateEnd))
 }
+
 func (repo *EventRepo) UpdateByID(ctx context.Context, userID, eventID string, event entities.Event) error {
 	dbEvent, err := fromDomainEvent(event)
 	if err != nil {

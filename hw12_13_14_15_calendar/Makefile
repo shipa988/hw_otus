@@ -76,13 +76,22 @@ start_scheduler:
 start_sender:
 	$(BUILD_SENDER) --config $(CONFIG_SENDER_PATH) --debug run
 
+create-db: os
+	docker-compose -f configs/docker-compose.yml up -d
+delete-db:
+	docker-compose -f configs/docker-compose.yml down -v
+tidy:
+	go mod tidy
+run:
+	go run cmd/calendar/main.go -d
+build:
+	go build $(BUILDPATH)
 test:
 	go test -race ./...
 testv:
 	go test -v -race ./...
 testi:
 	go test -p 1 -v ./tests -tags=integration
-prepare_lint:
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
 prepare_gen:
 	go install github.com/mailru/easyjson
@@ -141,11 +150,3 @@ integration-tests: up-prod testi down-prod
 integration-tests-ci: up-ci testi down-ci
 
 .PHONY: build, all, fmt, lint, test, run, os,up,down,gen,tidy, generate
-
-
-
-
-
-
-
-

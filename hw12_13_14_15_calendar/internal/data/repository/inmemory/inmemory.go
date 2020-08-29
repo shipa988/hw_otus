@@ -76,6 +76,7 @@ func (i EventRepo) GetByID(ctx context.Context, userID, eventID string) (*entiti
 	}
 	return nil, entities.ErrEventNotFound
 }
+
 func (i EventRepo) getByEventID(eventID string) (*entities.Event, error) {
 	i.m.rwmux.RLock()
 	defer i.m.rwmux.RUnlock()
@@ -190,6 +191,7 @@ func (i EventRepo) DeleteByUserID(ctx context.Context, userID, eventID string) e
 	delete(i.m.users[userID], e.DateTime)
 	return nil
 }
+
 func (i EventRepo) DeleteByID(ctx context.Context, eventID string) error {
 	e, err := i.getByEventID(eventID)
 	if err != nil {
@@ -202,6 +204,7 @@ func (i EventRepo) DeleteByID(ctx context.Context, eventID string) error {
 	delete(i.m.users[e.UserID], e.DateTime)
 	return nil
 }
+
 func eventCreateSafely(event *entities.Event) *entities.Event {
 	return &entities.Event{
 		ID:         event.ID,
