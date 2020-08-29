@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
-import "google/api/annotations.proto";
+import "googleapi/annotations.proto";
 
 option go_package = ".;grpcserver";
 
@@ -28,9 +28,7 @@ message AddEventRequest {
 }
 
 message AddEventResponse {
-  oneof result {
     string id = 1;
-  }
 }
 
 message DeleteEventRequest {
@@ -38,9 +36,7 @@ message DeleteEventRequest {
 }
 
 message DeleteEventResponse {
-  oneof result {
     string id = 1;
-  }
 }
 
 message UpdateEventRequest {
@@ -53,9 +49,7 @@ message UpdateEventRequest {
 }
 
 message UpdateEventResponse {
-  oneof result {
     string id = 1;
-  }
 }
 
 message GetDateEventRequest {
@@ -63,9 +57,7 @@ message GetDateEventRequest {
 }
 
 message GetDateEventResponse {
-  oneof result {
     Events events = 1;
-  }
 }
 
 message GetWeekEventRequest {
@@ -73,9 +65,7 @@ message GetWeekEventRequest {
 }
 
 message GetWeekEventResponse {
-  oneof result {
     Events events = 1;
-  }
 }
 
 message GetMonthEventRequest {
@@ -83,9 +73,7 @@ message GetMonthEventRequest {
 }
 
 message GetMonthEventResponse {
-  oneof result {
     Events events = 1;
-  }
 }
 
 service CalendarService {

@@ -9,7 +9,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
     ports:
       - 5432:5432
     volumes:
@@ -23,11 +23,58 @@ services:
     restart: always
     container_name: rabbitmq
     image: rabbitmq:3.8.7-management-alpine
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    depends_on:
+      - db
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     ports:
       - 5672:5672
       - 15672:15672
+  calendar:
+    restart: always
+    build:
+      context: ./
+      dockerfile: Dockerfile-calendar
+    depends_on:
+      - rabbitmq
+      - db
+    ports:
+      - 4444:4444
+      - 4445:4445
+      - 4446:4446
+    environment:
+      DSN: ${DSN}
+      RABBIT_ADDR: ${RABBIT_ADDR}
+  scheduler:
+    restart: always
+    build:
+      context: ./
+      dockerfile: Dockerfile-scheduler
+    depends_on:
+      - rabbitmq
+      - db
+      - calendar
+    environment:
+      DSN: ${DSN}
+      RABBIT_ADDR: ${RABBIT_ADDR}
+  sender:
+    restart: always
+    build:
+      context: ./
+      dockerfile: Dockerfile-sender
+    depends_on:
+      - rabbitmq
+      - db
+      - calendar
+      - scheduler
+    environment:
+      DSN: ${DSN}
+      RABBIT_ADDR: ${RABBIT_ADDR}
 volumes:
   pgdata:

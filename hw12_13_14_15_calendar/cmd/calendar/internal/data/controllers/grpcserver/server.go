@@ -1,4 +1,4 @@
-//go:generate  protoc -I ../../../../api/grpcapi/ api.proto --go_out=plugins=grpc:../../../../api/grpcapi --grpc-gateway_out=logtostderr=true:../../../../api/grpcapi
+//go:generate  protoc -I. -I../../../../api grpcapi/api.proto --go_out=plugins=grpc:../../../../api/grpcapi --grpc-gateway_out=logtostderr=true:../../../../api
 
 package grpcserver
 

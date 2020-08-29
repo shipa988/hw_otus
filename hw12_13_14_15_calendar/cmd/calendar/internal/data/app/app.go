@@ -4,11 +4,11 @@ import (
 	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/cmd/calendar/internal/data/controllers/grpcserver"
 	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/cmd/calendar/internal/data/controllers/httpserver"
 	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/cmd/calendar/internal/domain/usecases"
-	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal"
 	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/data/repository/db"
 	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/data/repository/inmemory"
 	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/domain/entities"
-	usecases2 "github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/domain/usecases"
+	mainusecase "github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/domain/usecases"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/logger"
 
 	"net"
 	"os"
@@ -34,7 +34,7 @@ func (a *App) Run(cfg *Config, isDebug bool) (err error) {
 		}
 	}
 
-	logger, err := internal.NewLogger(wr, cfg.Log.Level)
+	logger, err := logger.NewLogger(wr, cfg.Log.Level)
 	if err != nil {
 		return errors.Wrapf(err, "can't init logger")
 	}
@@ -59,14 +59,14 @@ func (a *App) Run(cfg *Config, isDebug bool) (err error) {
 	signal.Notify(quit, os.Interrupt)
 
 	wg.Add(1)
-	go httpServer.Serve(net.JoinHostPort("localhost", cfg.API.HTTPPort))
+	go httpServer.Serve(net.JoinHostPort("0.0.0.0", cfg.API.HTTPPort))
 
 	wg.Add(1)
-	l := grpcServer.PrepareGRPCListener(net.JoinHostPort("localhost", cfg.API.GRPCPort))
+	l := grpcServer.PrepareGRPCListener(net.JoinHostPort("0.0.0.0", cfg.API.GRPCPort))
 	go grpcServer.Serve(l)
 
 	wg.Add(1)
-	go grpcServer.ServeGW(net.JoinHostPort("localhost", cfg.API.GRPCPort), net.JoinHostPort("localhost", cfg.API.GRPCGWPort))
+	go grpcServer.ServeGW(net.JoinHostPort("0.0.0.0", cfg.API.GRPCPort), net.JoinHostPort("0.0.0.0", cfg.API.GRPCGWPort))
 
 	go func() {
 		wg.Wait()
@@ -82,7 +82,7 @@ func (a *App) Run(cfg *Config, isDebug bool) (err error) {
 	return nil
 }
 
-func InitRepo(cfg *Config, logger usecases2.Logger) (entities.EventRepo, error) {
+func InitRepo(cfg *Config, logger mainusecase.Logger) (entities.EventRepo, error) {
 	switch cfg.RepoType {
 	case "db":
 		repo, err := db.NewDBEventRepo(cfg.DB.Driver, cfg.DB.DSN, logger)

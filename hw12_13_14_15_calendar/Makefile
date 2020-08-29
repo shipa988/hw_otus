@@ -27,9 +27,8 @@ RABBITMQ_DEFAULT_USER = guest
 RABBITMQ_DEFAULT_PASS = guest
 
 docker_env:
-	PGCONNSTRING = "host=db port=5432 user=postgres password=postgres dbname=calendar sslmode=disable"
-	DSN = host=db port=5432 user=igor password=igor dbname=calendar sslmode=disable
-	RABBIT_ADDR = amqp://guest:guest@rabbitmq:5672/
+DSN = host=db port=5432 user=igor password=igor dbname=calendar sslmode=disable
+RABBIT_ADDR = amqp://guest:guest@rabbitmq:5672/
 
 os:
 ifeq ($(OS),Windows_NT)
@@ -49,11 +48,8 @@ BUILD_scheduler = calendar_scheduler.exe
 BUILD_SENDER = calendar_sender.exe
 
 endif
-
-create-db: os
-	docker-compose -f docker-compose.yml up -d
-delete-db:
-	docker-compose -f docker-compose.yml down -v
+timeout:
+	timeout 5
 tidy:
 	go mod tidy
 run:
@@ -84,7 +80,8 @@ test:
 	go test -race ./...
 testv:
 	go test -v -race ./...
-
+testi:
+	go test -p 1 -v ./tests -tags=integration
 prepare_lint:
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
 prepare_gen:
@@ -93,21 +90,62 @@ prepare_gen:
         github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway \
         github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger \
         github.com/golang/protobuf/protoc-gen-go
+prepare_migrate:
+	go get -u github.com/pressly/goose/cmd/goose@v2.7.0-rc4
+
 lint: prepare_lint fmt tidy
 	golangci-lint run ./...
 fmt:
 	go fmt ./...
 
-migrate_db_up: create-db
-	timeout 5
+docker-up-dev: os
+	docker-compose -f docker-compose-dev.yml up -d
+docker-down-dev:
+	docker-compose -f docker-compose-dev.yml down -v --remove-orphans
+
+docker-up: os
+	docker-compose -f docker-compose.yml up -d
+docker-down:
+	docker-compose -f docker-compose.yml down
+docker-down-hard:
+	docker-compose -f docker-compose.yml down -v --remove-orphans
+	docker rmi hw12_13_14_15_calendar_calendar:latest
+	docker rmi hw12_13_14_15_calendar_scheduler:latest
+	docker rmi hw12_13_14_15_calendar_sender:latest
+
+migrate_db:timeout goose_up
+
+goose_up:
 	goose -dir $(MIGRATIONPATH) postgres $(PGCONNSTRING) up
 goose_down:
 	goose -dir $(MIGRATIONPATH) postgres $(PGCONNSTRING) down
-migrate_db_down:	delete-db
+
 gen_json:
 	easyjson -all cmd/calendar/api/httpapi/api.go
 generate:
 	go generate ./...
-up: prepare_gen generate migrate_db_up gen_json build
-	calendar.exe --debug run
-.PHONY: build, all, fmt, lint, test, run, os,  generate
+
+up-dev: prepare_gen generate gen_json docker-up-dev prepare_migrate migrate_db build start_calendar
+down-dev: docker-down-dev
+
+up-prod: docker_env prepare_gen generate gen_json docker-up
+down-prod: docker-down
+
+up-ci: docker_env gen_json docker-up prepare_migrate migrate_db
+down-ci: docker-down-hard
+
+up: docker_env prepare_gen generate gen_json docker-up prepare_migrate migrate_db
+down: docker-down-hard
+
+integration-tests: up-prod testi down-prod
+integration-tests-ci: up-ci testi down-ci
+
+.PHONY: build, all, fmt, lint, test, run, os,up,down,gen,tidy, generate
+
+
+
+
+
+
+
+
