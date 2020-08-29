@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	logger2 "github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/logger"
 	"os"
 	"os/signal"
 	"sync"
@@ -15,6 +14,7 @@ import (
 	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/data/repository/inmemory"
 	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/domain/entities"
 	mainusecase "github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/domain/usecases"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/internal/logger"
 )
 
 type App struct {
@@ -50,7 +50,7 @@ func (a *App) Run(cfg *Config, isDebug bool) (err error) {
 		}
 	}
 
-	logger, err := logger2.NewLogger(wr, cfg.Log.Level)
+	logger, err := logger.NewLogger(wr, cfg.Log.Level)
 	if err != nil {
 		return errors.Wrapf(err, "can't init logger")
 	}

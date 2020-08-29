@@ -59,9 +59,7 @@ func (cs *GRPCServer) AddEvent(ctx context.Context, req *api.AddEventRequest) (*
 	}
 
 	resp := &api.AddEventResponse{
-		Result: &api.AddEventResponse_Id{
-			Id: id,
-		},
+		Id: id,
 	}
 	return resp, nil
 }
@@ -76,9 +74,7 @@ func (cs *GRPCServer) DeleteEvent(ctx context.Context, req *api.DeleteEventReque
 	}
 
 	resp := &api.DeleteEventResponse{
-		Result: &api.DeleteEventResponse_Id{
-			Id: id,
-		},
+		Id: id,
 	}
 	return resp, nil
 }
@@ -93,9 +89,7 @@ func (cs *GRPCServer) UpdateEvent(ctx context.Context, req *api.UpdateEventReque
 	}
 
 	resp := &api.UpdateEventResponse{
-		Result: &api.UpdateEventResponse_Id{
-			Id: id,
-		},
+		Id: id,
 	}
 	return resp, nil
 }
@@ -115,9 +109,7 @@ func (cs *GRPCServer) GetDateEvent(ctx context.Context, req *api.GetDateEventReq
 	}
 
 	resp := &api.GetDateEventResponse{
-		Result: &api.GetDateEventResponse_Events{
-			Events: evs,
-		},
+		Events: evs,
 	}
 	return resp, nil
 }
@@ -137,9 +129,7 @@ func (cs *GRPCServer) GetWeekEvent(ctx context.Context, req *api.GetWeekEventReq
 	}
 
 	resp := &api.GetWeekEventResponse{
-		Result: &api.GetWeekEventResponse_Events{
-			Events: evs,
-		},
+		Events: evs,
 	}
 	return resp, nil
 }
@@ -159,9 +149,7 @@ func (cs *GRPCServer) GetMonthEvent(ctx context.Context, req *api.GetMonthEventR
 	}
 
 	resp := &api.GetMonthEventResponse{
-		Result: &api.GetMonthEventResponse_Events{
-			Events: evs,
-		},
+		Events: evs,
 	}
 	return resp, nil
 }

@@ -101,7 +101,7 @@ func TestGRPCServer(t *testing.T) {
 		r, err := client.AddEvent(ctx, req)
 
 		expresp := &api.AddEventResponse{
-			Result: &api.AddEventResponse_Id{Id: id},
+			Id: id,
 		}
 
 		require.Nil(t, err)
@@ -136,7 +136,7 @@ func TestGRPCServer(t *testing.T) {
 		r, err := client.DeleteEvent(ctx, req)
 
 		expresp := &api.DeleteEventResponse{
-			Result: &api.DeleteEventResponse_Id{Id: id},
+			Id: id,
 		}
 
 		require.Nil(t, err)
@@ -171,7 +171,7 @@ func TestGRPCServer(t *testing.T) {
 		r, err := client.UpdateEvent(ctx, req)
 
 		expresp := &api.UpdateEventResponse{
-			Result: &api.UpdateEventResponse_Id{Id: id},
+			Id: id,
 		}
 
 		require.Nil(t, err)
@@ -206,7 +206,7 @@ func TestGRPCServer(t *testing.T) {
 		r, err := client.GetDateEvent(ctx, req)
 
 		expresp := &api.GetDateEventResponse{
-			Result: &api.GetDateEventResponse_Events{testPBEvents},
+			Events:testPBEvents,
 		}
 
 		require.Nil(t, err)
@@ -241,7 +241,7 @@ func TestGRPCServer(t *testing.T) {
 		r, err := client.GetWeekEvent(ctx, req)
 
 		expresp := &api.GetWeekEventResponse{
-			Result: &api.GetWeekEventResponse_Events{testPBEvents},
+			Events:testPBEvents,
 		}
 
 		require.Nil(t, err)
@@ -276,7 +276,7 @@ func TestGRPCServer(t *testing.T) {
 		r, err := client.GetMonthEvent(ctx, req)
 
 		expresp := &api.GetMonthEventResponse{
-			Result: &api.GetMonthEventResponse_Events{testPBEvents},
+			Events:testPBEvents,
 		}
 
 		require.Nil(t, err)
