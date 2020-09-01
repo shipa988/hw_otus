@@ -17,9 +17,12 @@ type EventRepo interface {
 	Add(ctx context.Context, event Event) (ID string, err error)
 	GetByID(ctx context.Context, userID, eventID string) (*Event, error)
 	GetByDate(ctx context.Context, userID string, date time.Time) ([]*Event, error)
-	GetForPeriod(ctx context.Context, userID string, dateStart time.Time, dateEnd time.Time) ([]*Event, error)
+	GetByNotifyDate(ctx context.Context, date time.Time) ([]*Event, error)
+	GetForPeriodByUserID(ctx context.Context, userID string, dateStart time.Time, dateEnd time.Time) ([]*Event, error)
+	GetForPeriod(ctx context.Context, dateStart time.Time, dateEnd time.Time) ([]*Event, error)
 	UpdateByID(ctx context.Context, userID, eventID string, event Event) error
-	DeleteByID(ctx context.Context, userID, eventID string) error
+	DeleteByUserID(ctx context.Context, userID, eventID string) error
+	DeleteByID(ctx context.Context, eventID string) error
 }
 
 type Event struct {

@@ -77,6 +77,15 @@ func (i EventRepo) GetByID(ctx context.Context, userID, eventID string) (*entiti
 	return nil, entities.ErrEventNotFound
 }
 
+func (i EventRepo) getByEventID(eventID string) (*entities.Event, error) {
+	i.m.rwmux.RLock()
+	defer i.m.rwmux.RUnlock()
+	if event, ok := i.m.events[eventID]; ok {
+		return eventCreateSafely(event), nil
+	}
+	return nil, entities.ErrEventNotFound
+}
+
 func (i EventRepo) GetByDate(ctx context.Context, userID string, date time.Time) ([]*entities.Event, error) {
 	i.m.rwmux.RLock()
 	defer i.m.rwmux.RUnlock()
@@ -96,7 +105,42 @@ func (i EventRepo) GetByDate(ctx context.Context, userID string, date time.Time)
 	return events, nil
 }
 
-func (i EventRepo) GetForPeriod(ctx context.Context, userID string, dateStart time.Time, dateEnd time.Time) ([]*entities.Event, error) {
+func (i EventRepo) GetByNotifyDate(ctx context.Context, date time.Time) ([]*entities.Event, error) {
+	i.m.rwmux.RLock()
+	defer i.m.rwmux.RUnlock()
+	events := []*entities.Event{}
+
+	for _, dates := range i.m.users {
+		for datetime, event := range dates {
+			if dateCompare(datetime.Add(-event.TimeNotify), date) {
+				events = append(events, eventCreateSafely(event))
+			}
+		}
+	}
+
+	if len(events) == 0 {
+		return nil, entities.ErrEventNotFound
+	}
+	return events, nil
+}
+func (i EventRepo) GetForPeriod(ctx context.Context, dateStart time.Time, dateEnd time.Time) ([]*entities.Event, error) {
+	i.m.rwmux.RLock()
+	defer i.m.rwmux.RUnlock()
+	events := []*entities.Event{}
+	for _, dates := range i.m.users {
+		for datetime, event := range dates {
+			if datetime == dateStart || datetime == dateEnd || (datetime.After(dateStart) && datetime.Before(dateEnd)) {
+				events = append(events, eventCreateSafely(event))
+			}
+		}
+	}
+	if len(events) == 0 {
+		return nil, entities.ErrEventNotFound
+	}
+	return events, nil
+}
+
+func (i EventRepo) GetForPeriodByUserID(ctx context.Context, userID string, dateStart time.Time, dateEnd time.Time) ([]*entities.Event, error) {
 	i.m.rwmux.RLock()
 	defer i.m.rwmux.RUnlock()
 	events := []*entities.Event{}
@@ -135,7 +179,7 @@ func (i EventRepo) UpdateByID(ctx context.Context, userID, eventID string, event
 	return nil
 }
 
-func (i EventRepo) DeleteByID(ctx context.Context, userID, eventID string) error {
+func (i EventRepo) DeleteByUserID(ctx context.Context, userID, eventID string) error {
 	e, err := i.GetByID(ctx, userID, eventID)
 	if err != nil {
 		return errors.Wrapf(err, "can't delete event id:%v", eventID)
@@ -145,6 +189,19 @@ func (i EventRepo) DeleteByID(ctx context.Context, userID, eventID string) error
 
 	delete(i.m.events, eventID)
 	delete(i.m.users[userID], e.DateTime)
+	return nil
+}
+
+func (i EventRepo) DeleteByID(ctx context.Context, eventID string) error {
+	e, err := i.getByEventID(eventID)
+	if err != nil {
+		return errors.Wrapf(err, "can't delete event id:%v", eventID)
+	}
+	i.m.rwmux.Lock()
+	defer i.m.rwmux.Unlock()
+
+	delete(i.m.events, eventID)
+	delete(i.m.users[e.UserID], e.DateTime)
 	return nil
 }
 
@@ -161,8 +218,8 @@ func eventCreateSafely(event *entities.Event) *entities.Event {
 }
 
 func dateCompare(dt1, dt2 time.Time) bool {
-	return dt1 == dt2
-	/*y1, m1, d1 := dt1.Date()
+	//return dt1 == dt2
+	y1, m1, d1 := dt1.Date()
 	y2, m2, d2 := dt2.Date()
-	return (y1 == y2 && m1 == m2 && d1 == d2)*/
+	return (y1 == y2 && m1 == m2 && d1 == d2)
 }

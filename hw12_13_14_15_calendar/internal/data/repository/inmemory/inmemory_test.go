@@ -14,6 +14,7 @@ import (
 var (
 	testid    = "00112233-4455-6677-8899-aabbccddeeff"
 	testdt, _ = time.Parse(entities.LayoutISO, "2020-06-25 14:14:14")
+	testndt   = testdt.Add(-360000000000)
 	testEvent = entities.Event{
 		ID:         testid,
 		Title:      "title",
@@ -91,6 +92,25 @@ func TestInMemoryEventRepo(t *testing.T) {
 		require.Nil(t, e)
 		require.Truef(t, errors.Is(err, entities.ErrEventNotFound), "return error must be: %q", entities.ErrEventNotFound)
 	})
+	t.Run("get by notify date good", func(t *testing.T) {
+		repo.m.Clear()
+		outsideAddMapRepo(repo.m, testEvent)
+
+		e, err := repo.GetByNotifyDate(ctx, testndt)
+
+		require.Nil(t, err)
+		var es []*entities.Event
+		es = append(es, &testEvent)
+		require.Equal(t, es, e, "events array not expected")
+	})
+	t.Run("get by notify date bad", func(t *testing.T) {
+		repo.m.Clear()
+		outsideAddMapRepo(repo.m, testEvent)
+		e, err := repo.GetByNotifyDate(ctx, time.Now())
+
+		require.Nil(t, e)
+		require.Truef(t, errors.Is(err, entities.ErrEventNotFound), "return error must be: %q", entities.ErrEventNotFound)
+	})
 	t.Run("get by period good", func(t *testing.T) {
 		repo.m.Clear()
 
@@ -121,7 +141,7 @@ func TestInMemoryEventRepo(t *testing.T) {
 		expectedEvents = append(expectedEvents, &testEvent)
 		expectedEvents = append(expectedEvents, &testEvent2)
 
-		actualEvents, err := repo.GetForPeriod(ctx, testid, testdt, testdt.AddDate(0, 1, 0))
+		actualEvents, err := repo.GetForPeriodByUserID(ctx, testid, testdt, testdt.AddDate(0, 1, 0))
 
 		require.Nil(t, err)
 		require.EqualValues(t, expectedEvents, actualEvents, "events array not expected")
@@ -150,7 +170,7 @@ func TestInMemoryEventRepo(t *testing.T) {
 		outsideAddMapRepo(repo.m, testEvent2)
 		outsideAddMapRepo(repo.m, testEvent3)
 
-		actualEvents, err := repo.GetForPeriod(ctx, testid, testdt.AddDate(0, 1, 0), testdt.AddDate(0, 1, 1))
+		actualEvents, err := repo.GetForPeriodByUserID(ctx, testid, testdt.AddDate(0, 1, 0), testdt.AddDate(0, 1, 1))
 
 		require.Nil(t, actualEvents)
 		require.Truef(t, errors.Is(err, entities.ErrEventNotFound), "return error must be: %q", entities.ErrEventNotFound)
@@ -159,14 +179,14 @@ func TestInMemoryEventRepo(t *testing.T) {
 		repo.m.Clear()
 		outsideAddMapRepo(repo.m, testEvent)
 
-		err := repo.DeleteByID(ctx, testid, testid)
+		err := repo.DeleteByUserID(ctx, testid, testid)
 
 		require.Nil(t, err)
 	})
 	t.Run("delete bad", func(t *testing.T) {
 		repo.m.Clear()
 		outsideAddMapRepo(repo.m, testEvent)
-		err := repo.DeleteByID(ctx, testid, "not id")
+		err := repo.DeleteByUserID(ctx, testid, "not id")
 
 		require.Truef(t, errors.Is(err, entities.ErrEventNotFound), "return error must be: %q", entities.ErrEventNotFound)
 	})
@@ -217,12 +237,12 @@ func TestInMemoryEventRepo(t *testing.T) {
 			go func() {
 				defer wg.Done()
 				for id := range echan {
-					repo.DeleteByID(ctx, testid, id)
+					repo.DeleteByUserID(ctx, testid, id)
 				}
 			}()
 		}
 		wg.Wait()
-		l, _ := repo.GetForPeriod(ctx, testid, time.Now().AddDate(-10, 0, 0), time.Now().AddDate(10, 0, 0))
+		l, _ := repo.GetForPeriodByUserID(ctx, testid, time.Now().AddDate(-10, 0, 0), time.Now().AddDate(10, 0, 0))
 		require.Equal(t, 0, len(l), "events list must be empty")
 	})
 }

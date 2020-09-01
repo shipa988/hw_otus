@@ -1,0 +1,12 @@
+log:
+  file:  ./calendar.log
+  level:  info
+repotype: db
+db:
+  dsn:  host=localhost port=5432 user=igor password=igor dbname=calendar sslmode=disable
+  driver:  pgx
+queue: rabbit
+rabbit:
+  exchangeName: exchange_calendar
+  queueName: topic_calendar
+  addr: amqp://guest:guest@localhost:5672/

@@ -4,7 +4,7 @@ package mocks
 import (
 	"net/http"
 
-	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/api/httpapi"
+	"github.com/shipa988/hw_otus/hw12_13_14_15_calendar/cmd/calendar/api/httpapi"
 )
 
 var _ httpapi.Handler = (*MockHandler)(nil)

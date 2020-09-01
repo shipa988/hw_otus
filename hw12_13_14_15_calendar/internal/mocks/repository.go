@@ -17,6 +17,21 @@ type EventRepo struct {
 	testEvent *entities.Event
 }
 
+func (i *EventRepo) GetByNotifyDate(ctx context.Context, date time.Time) ([]*entities.Event, error) {
+	return []*entities.Event{i.testEvent}, nil
+}
+
+func (i *EventRepo) GetForPeriodByUserID(ctx context.Context, userID string, dateStart time.Time, dateEnd time.Time) ([]*entities.Event, error) {
+	return []*entities.Event{i.testEvent}, nil
+}
+
+func (i *EventRepo) DeleteByUserID(ctx context.Context, userID, eventID string) error {
+	if userID == "" || eventID == "" {
+		return errors.New("")
+	}
+	return nil
+}
+
 func NewMockRepo(event *entities.Event) *EventRepo {
 	return &EventRepo{
 		testEvent: event,
@@ -35,7 +50,7 @@ func (i *EventRepo) GetByDate(ctx context.Context, userID string, date time.Time
 	return []*entities.Event{i.testEvent}, nil
 }
 
-func (i *EventRepo) GetForPeriod(ctx context.Context, userID string, dateStart time.Time, dateEnd time.Time) ([]*entities.Event, error) {
+func (i *EventRepo) GetForPeriod(ctx context.Context, dateStart time.Time, dateEnd time.Time) ([]*entities.Event, error) {
 	return []*entities.Event{i.testEvent}, nil
 }
 
@@ -46,8 +61,8 @@ func (i *EventRepo) UpdateByID(ctx context.Context, userID, eventID string, even
 	return nil
 }
 
-func (i *EventRepo) DeleteByID(ctx context.Context, userID, eventID string) error {
-	if userID == "" || eventID == "" {
+func (i *EventRepo) DeleteByID(ctx context.Context, eventID string) error {
+	if eventID == "" {
 		return errors.New("")
 	}
 	return nil
